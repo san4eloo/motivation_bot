@@ -13,7 +13,7 @@ export function registerCommands(bot: Bot): void {
   registerScheduleCommands(bot);
   registerStatsCommands(bot);
   registerTaskCommands(bot);
-  registerTaskCallbacks(bot);
   registerHabitCommands(bot);
   registerWakeupCommands(bot);
+  registerTaskCallbacks(bot);
 }

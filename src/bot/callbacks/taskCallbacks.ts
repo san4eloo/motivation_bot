@@ -200,12 +200,13 @@ export function registerTaskCallbacks(bot: Bot): void {
     });
   });
 
-  bot.on("message:text", async (ctx) => {
+  bot.on("message:text", async (ctx, next) => {
     const chatId = String(ctx.chat.id);
 
     const taskId = pendingActualTime.get(chatId);
 
     if (!taskId) {
+      await next();
       return;
     }
 
