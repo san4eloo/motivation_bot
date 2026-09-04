@@ -1,5 +1,7 @@
 import { Bot } from "grammy";
 
+import { registerHabitCommands } from "./commands/habitCommands";
+import { registerWakeupCommands } from "./commands/wakeupCommands";
 import { registerCommonCommands } from "./commands/commonCommands";
 import { registerScheduleCommands } from "./commands/scheduleCommands";
 import { registerStatsCommands } from "./commands/statsCommands";
@@ -12,4 +14,6 @@ export function registerCommands(bot: Bot): void {
   registerStatsCommands(bot);
   registerTaskCommands(bot);
   registerTaskCallbacks(bot);
+  registerHabitCommands(bot);
+  registerWakeupCommands(bot);
 }
