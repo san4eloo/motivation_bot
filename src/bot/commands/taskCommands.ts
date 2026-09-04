@@ -43,7 +43,6 @@ async function replyTodayTasks(
 
   if (!tasks.length) {
     await bot.api.sendMessage(chatId, "На сегодня личных задач нет.");
-
     return;
   }
 
@@ -85,14 +84,11 @@ export function registerTaskCommands(bot: Bot): void {
 
     if (parts.length < 3) {
       await ctx.reply(addUsage());
-
       return;
     }
 
     const end = parts.pop()!;
-
     const start = parts.pop()!;
-
     const categoryRaw = parts.shift()!;
 
     const category = resolveCategory(categoryRaw);
@@ -109,13 +105,11 @@ export function registerTaskCommands(bot: Bot): void {
 
     if (!isValidTime(start) || !isValidTime(end)) {
       await ctx.reply(["Не понял время.", "", addUsage()].join("\n"));
-
       return;
     }
 
     if (toMinutes(end) <= toMinutes(start)) {
       await ctx.reply("Время окончания должно быть позже времени начала.");
-
       return;
     }
 
@@ -129,17 +123,12 @@ export function registerTaskCommands(bot: Bot): void {
 
     const date = getDateInTimezone();
 
+    // Получаем всё расписание дня:
+    // ВУЗ, спорт и уже добавленные личные задачи.
     const schedule = await getScheduleForDate(date, String(ctx.chat.id));
 
+    // Проверяем пересечение, но больше НЕ запрещаем создание задачи.
     const conflict = findConflict(schedule, start, end);
-
-    if (conflict) {
-      await ctx.reply(
-        `Не добавил: ${start}–${end} пересекается с «${conflict.title}» (${conflict.start}–${conflict.end}).`
-      );
-
-      return;
-    }
 
     const task = await addTask({
       chatId: String(ctx.chat.id),
@@ -155,17 +144,30 @@ export function registerTaskCommands(bot: Bot): void {
       plannedEnd: end,
     });
 
-    await ctx.reply(
-      [
-        "✅ Задача запланирована",
+    const lines = [
+      "✅ Задача запланирована",
+      "",
+      categoryLabel(task.category),
+      `📝 ${task.title}`,
+      `🕒 ${task.plannedStart}–${task.plannedEnd}`,
+    ];
+
+    if (conflict) {
+      lines.push(
         "",
-        categoryLabel(task.category),
-        `📝 ${task.title}`,
-        `🕒 ${task.plannedStart}–${task.plannedEnd}`,
+        "⚠️ Есть пересечение:",
+        `«${conflict.title}» (${conflict.start}–${conflict.end})`,
         "",
-        "Она попадёт в фактическую статистику только после отметки «Выполнено» в /tasks.",
-      ].join("\n")
+        "Задача всё равно добавлена."
+      );
+    }
+
+    lines.push(
+      "",
+      "Она попадёт в фактическую статистику только после отметки «Выполнено» в /tasks."
     );
+
+    await ctx.reply(lines.join("\n"));
   });
 
   bot.command("tasks", async (ctx) => {
